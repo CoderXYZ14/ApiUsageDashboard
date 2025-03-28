@@ -1,15 +1,14 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../../auth/[...nextauth]/options";
+import { authOptions } from "../auth/[...nextauth]/options";
 import dbConnect from "@/lib/dbConnect";
 import { mockData } from "@/constants/mockData";
-import { BrandData } from "@/types/brand";
 
-export async function GET(
-  request: Request,
-  { params }: { params: { brandId: string } }
-) {
+export async function GET(request: NextRequest) {
   await dbConnect();
+
+  const url = new URL(request.url);
+  const brandId = url.searchParams.get("brandId");
 
   try {
     const session = await getServerSession(authOptions);
@@ -23,8 +22,6 @@ export async function GET(
       );
     }
 
-    const { brandId } = await params;
-
     if (brandId !== session.user.id) {
       return NextResponse.json(
         {
@@ -35,7 +32,6 @@ export async function GET(
       );
     }
 
-    // Get brand data from mock data
     const brandData = mockData[brandId];
 
     if (!brandData) {
