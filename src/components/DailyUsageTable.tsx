@@ -20,7 +20,7 @@ interface DailyUsageTableProps {
   data: DailyUsage[];
 }
 
-export function DailyUsageTable({ data }: DailyUsageTableProps) {
+export default function DailyUsageTable({ data }: DailyUsageTableProps) {
   return (
     <div className="rounded-md border border-blue-200 dark:border-slate-700 overflow-hidden h-full overflow-y-auto">
       <Table>

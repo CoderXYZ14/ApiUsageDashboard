@@ -1,4 +1,4 @@
-import { Schema, model, models } from "mongoose";
+import { Schema, model, models, CallbackError } from "mongoose";
 import bcrypt from "bcryptjs";
 
 const BrandSchema = new Schema(
@@ -36,8 +36,8 @@ BrandSchema.pre("save", async function (next) {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
     next();
-  } catch (err: any) {
-    next(err);
+  } catch (err: unknown) {
+    next(err as CallbackError);
   }
 });
 

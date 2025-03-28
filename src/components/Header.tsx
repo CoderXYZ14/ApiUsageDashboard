@@ -26,7 +26,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export function Header() {
+export default function Header() {
   const router = useRouter();
   const { data: session } = useSession();
   const { theme, setTheme } = useTheme();
@@ -57,7 +57,6 @@ export function Header() {
       </Link>
 
       <div className="ml-auto flex items-center gap-4">
-        {/* Theme Toggle */}
         <Button
           variant="ghost"
           size="icon"
@@ -72,7 +71,6 @@ export function Header() {
           <span className="sr-only">Toggle theme</span>
         </Button>
 
-        {/* Authentication-based Dropdown/Actions */}
         {session ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

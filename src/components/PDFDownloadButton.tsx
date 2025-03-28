@@ -5,13 +5,14 @@ import { PDFReport } from "./PDFReport";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { BrandData } from "@/types/brand";
+import { Session } from "next-auth";
 
 const PDFDownloadButton = ({
   brandData,
   session,
 }: {
   brandData: BrandData;
-  session: any;
+  session: Session | null;
 }) => {
   return (
     <PDFDownloadLink

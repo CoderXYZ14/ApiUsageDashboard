@@ -3,20 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import {
-  AlertCircle,
-  Calendar,
-  ChevronDown,
-  Database,
-  Download,
-  LogOut,
-  Moon,
-  Settings,
-  Sun,
-  User,
-} from "lucide-react";
-
-import html2pdf from "html2pdf.js";
+import { AlertCircle, Database } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -29,18 +16,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import ApiCallsChart from "@/components/api-calls-chart";
-import ErrorRateChart from "@/components/error-rate-chart";
-import StatusDistributionChart from "@/components/status-distribution-chart";
-import { DailyUsageTable } from "@/components/daily-usage-table";
+import {
+  ApiCallsChart,
+  ErrorRateChart,
+  StatusDistributionChart,
+  DailyUsageTable,
+  PDFDownloadButton,
+  Header,
+  Footer,
+} from "@/components";
+
 import { toast } from "sonner";
 import { BrandData } from "@/types/brand";
 import { useSession } from "next-auth/react";
-import { Header } from "@/components/header";
-import Footer from "@/components/footer";
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import { PDFReport } from "@/components/PDFReport";
-import PDFDownloadButton from "@/components/PDFDownloadButton";
 
 export default function DashboardPage() {
   const [brandData, setBrandData] = useState<BrandData | null>(null);
@@ -53,12 +41,16 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchBrandData = async () => {
       try {
-        const brandId = await session?.user?.id;
+        const brandId = session?.user?.id as string;
         if (!brandId) {
           toast.error("Unauthorized access");
           return;
         }
-        const response = await axios.get(`/api/usage/${brandId}`);
+        const response = await axios.get(`/api/usage`, {
+          params: {
+            brandId,
+          },
+        });
         if (response.data.success) {
           setBrandData(response.data.data);
           setIsLoading(false);

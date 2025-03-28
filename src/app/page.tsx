@@ -2,16 +2,15 @@
 
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
-import { Header } from "@/components/header";
-import Footer from "@/components/footer";
+
+import Footer from "@/components/Footer";
+import { Header } from "@/components";
 
 export default function Home() {
-  const { theme } = useTheme();
-
   return (
+    //comment to counter deployment error
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-slate-900 dark:to-blue-950">
       <Header />
       <main className="flex-1">
@@ -28,7 +27,7 @@ export default function Home() {
                 </p>
               </div>
               <div className="flex gap-4 flex-wrap justify-center">
-                <Link href="/login">
+                <Link href="/dashboard">
                   <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-lg transform transition-all hover:scale-105">
                     Get Started <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>

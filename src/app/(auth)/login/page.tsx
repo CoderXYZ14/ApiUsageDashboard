@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -45,8 +44,9 @@ export default function LoginPage() {
         toast.success("Welcome to your API dashboard");
         router.push("/dashboard");
       }
-    } catch (error) {
+    } catch (err) {
       toast.error("An error occurred during login");
+      console.error("An error occurred during login:", err);
     } finally {
       setIsLoading(false);
     }
@@ -54,9 +54,6 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-b from-indigo-50 to-white relative">
-      <div className="absolute top-4 right-4">
-        <ThemeToggle />
-      </div>
       <main className="flex-1 flex items-center justify-center px-4 py-12">
         <Card className="w-full max-w-md shadow-lg hover:shadow-xl transition-shadow bg-white/95 backdrop-blur">
           <CardHeader className="space-y-1">
@@ -128,7 +125,7 @@ export default function LoginPage() {
                   href="/register"
                   className="text-purple-600 hover:text-purple-700 font-medium"
                 >
-                  Don't have an account? Create one
+                  Don&apos;t have an account? Create one
                 </Link>
                 <Link
                   href="/"

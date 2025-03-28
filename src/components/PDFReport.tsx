@@ -1,8 +1,9 @@
 import React from "react";
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import { BrandData } from "@/types/brand";
 
 interface PDFReportProps {
-  brandData: any;
+  brandData: BrandData;
   userName: string;
 }
 

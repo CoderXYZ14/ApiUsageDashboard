@@ -20,7 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ThemeToggle } from "@/components/theme-toggle";
+
 import { signIn } from "next-auth/react";
 
 export default function RegisterPage() {
@@ -59,8 +59,9 @@ export default function RegisterPage() {
         toast.success("Welcome to your API dashboard");
         router.push("/dashboard");
       }
-    } catch (error) {
+    } catch (err) {
       toast.error("An error occurred during registration");
+      console.error("An error occurred during registration:", err);
     } finally {
       setIsLoading(false);
     }
@@ -68,9 +69,6 @@ export default function RegisterPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-b from-indigo-50 to-white relative">
-      <div className="absolute top-4 right-4">
-        <ThemeToggle />
-      </div>
       <main className="flex-1 flex items-center justify-center px-4 py-12">
         <Card className="w-full max-w-md shadow-lg hover:shadow-xl transition-shadow bg-white/95 backdrop-blur">
           <CardHeader className="space-y-1">
