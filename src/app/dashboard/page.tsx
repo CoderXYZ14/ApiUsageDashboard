@@ -16,6 +16,8 @@ import {
   User,
 } from "lucide-react";
 
+import html2pdf from "html2pdf.js";
+
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,6 +38,9 @@ import { BrandData } from "@/types/brand";
 import { useSession } from "next-auth/react";
 import { Header } from "@/components/header";
 import Footer from "@/components/footer";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import { PDFReport } from "@/components/PDFReport";
+import PDFDownloadButton from "@/components/PDFDownloadButton";
 
 export default function DashboardPage() {
   const [brandData, setBrandData] = useState<BrandData | null>(null);
@@ -70,11 +75,6 @@ export default function DashboardPage() {
 
     fetchBrandData();
   }, [session]);
-
-  const handleLogout = () => {
-    toast.success("You have been logged out successfully");
-    router.push("/");
-  };
 
   if (isLoading) {
     return (
@@ -128,13 +128,9 @@ export default function DashboardPage() {
               Welcome, {session?.user?.name || "Brand"}
             </p>
           </div>
-          <Button
-            onClick={() => toast.success("Data exported successfully")}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-none"
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Export Data
-          </Button>
+          {brandData && (
+            <PDFDownloadButton brandData={brandData} session={session} />
+          )}
         </div>
         {brandData.errorRate > 10 && (
           <Alert
@@ -254,7 +250,6 @@ export default function DashboardPage() {
                 </CardTitle>
               </div>
 
-              {/* Desktop Buttons - Hidden on mobile */}
               <div className="hidden md:flex space-x-2">
                 {[
                   "apiCalls",
@@ -283,7 +278,6 @@ export default function DashboardPage() {
                 ))}
               </div>
 
-              {/* Mobile Dropdown - Visible on mobile */}
               <div className="md:hidden">
                 <select
                   value={activeChart}

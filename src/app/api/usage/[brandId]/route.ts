@@ -23,7 +23,9 @@ export async function GET(
       );
     }
 
-    if (params.brandId !== session.user.id) {
+    const { brandId } = await params;
+
+    if (brandId !== session.user.id) {
       return NextResponse.json(
         {
           success: false,
@@ -34,7 +36,7 @@ export async function GET(
     }
 
     // Get brand data from mock data
-    const brandData = mockData[params.brandId];
+    const brandData = mockData[brandId];
 
     if (!brandData) {
       return NextResponse.json(
