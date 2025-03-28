@@ -12,26 +12,26 @@ export async function GET(
   await dbConnect();
 
   try {
-    // const session = await getServerSession(authOptions);
-    // if (!session?.user?.id) {
-    //   return NextResponse.json(
-    //     {
-    //       success: false,
-    //       message: "Not authenticated",
-    //     },
-    //     { status: 401 }
-    //   );
-    // }
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Not authenticated",
+        },
+        { status: 401 }
+      );
+    }
 
-    // if (params.brandId !== session.user.id) {
-    //   return NextResponse.json(
-    //     {
-    //       success: false,
-    //       message: "Unauthorized access",
-    //     },
-    //     { status: 403 }
-    //   );
-    // }
+    if (params.brandId !== session.user.id) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Unauthorized access",
+        },
+        { status: 403 }
+      );
+    }
 
     // Get brand data from mock data
     const brandData = mockData[params.brandId];

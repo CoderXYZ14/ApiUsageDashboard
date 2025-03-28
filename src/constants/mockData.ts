@@ -1,7 +1,7 @@
 import { BrandDataMap } from "@/types/brand";
 
 export const mockData: BrandDataMap = {
-  brand1: {
+  "67e6f26f6c02764389ccb049": {
     totalCalls: 12458,
     successfulCalls: 11982,
     failedCalls: 476,
@@ -17,7 +17,7 @@ export const mockData: BrandDataMap = {
       { date: "2024-03-28", total: 1533, successful: 1445, failed: 88 },
     ],
   },
-  brand2: {
+  "67e6f70a6c02764389ccb04e": {
     totalCalls: 8765,
     successfulCalls: 7889,
     failedCalls: 876,

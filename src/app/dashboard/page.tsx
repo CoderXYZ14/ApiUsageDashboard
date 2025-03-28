@@ -7,6 +7,7 @@ import {
   AlertCircle,
   Calendar,
   ChevronDown,
+  Database,
   Download,
   LogOut,
   Moon,
@@ -25,16 +26,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
-import { useTheme } from "next-themes";
 
 import ApiCallsChart from "@/components/api-calls-chart";
 import ErrorRateChart from "@/components/error-rate-chart";
@@ -42,6 +33,9 @@ import StatusDistributionChart from "@/components/status-distribution-chart";
 import { DailyUsageTable } from "@/components/daily-usage-table";
 import { toast } from "sonner";
 import { BrandData } from "@/types/brand";
+import { useSession } from "next-auth/react";
+import { Header } from "@/components/header";
+import Footer from "@/components/footer";
 
 export default function DashboardPage() {
   const [brandData, setBrandData] = useState<BrandData | null>(null);
@@ -49,13 +43,16 @@ export default function DashboardPage() {
   const [activeChart, setActiveChart] = useState("apiCalls");
   const router = useRouter();
 
-  const { theme, setTheme } = useTheme();
+  const { data: session } = useSession();
 
   useEffect(() => {
     const fetchBrandData = async () => {
       try {
-        // Assuming the brandId is the same as the user's id
-        const brandId = "brand1"; // This could come from props, context, or router
+        const brandId = await session?.user?.id;
+        if (!brandId) {
+          toast.error("Unauthorized access");
+          return;
+        }
         const response = await axios.get(`/api/usage/${brandId}`);
         if (response.data.success) {
           setBrandData(response.data.data);
@@ -72,7 +69,7 @@ export default function DashboardPage() {
     };
 
     fetchBrandData();
-  }, []);
+  }, [session]);
 
   const handleLogout = () => {
     toast.success("You have been logged out successfully");
@@ -81,74 +78,56 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p>Loading...</p>
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 dark:from-slate-900 dark:to-blue-950">
+        <div className="text-center">
+          <div className="animate-spin mb-4 mx-auto w-16 h-16 border-t-4 border-b-4 border-blue-500 rounded-full"></div>
+          <h2 className="text-2xl font-semibold text-blue-600 dark:text-blue-400">
+            Loading Dashboard
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300 mt-2">
+            Fetching your API usage data...
+          </p>
+        </div>
       </div>
     );
   }
 
   if (!brandData) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p>No brand data available</p>
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 dark:from-slate-900 dark:to-blue-950">
+        <div className="text-center max-w-md p-8 bg-white dark:bg-slate-800 rounded-xl shadow-lg">
+          <Database className="mx-auto mb-4 w-16 h-16 text-blue-500 dark:text-blue-400" />
+          <h2 className="text-2xl font-bold mb-2 text-blue-600 dark:text-blue-400">
+            No Data Available
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300 mb-4">
+            It seems there is no API usage data for your brand at the moment.
+            Check back later or contact support if this persists.
+          </p>
+          <Button
+            onClick={() => router.push("/")}
+            className="bg-blue-500 hover:bg-blue-600 text-white"
+          >
+            Back to home
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-blue-50 to-purple-50 dark:from-slate-900 dark:to-blue-950">
-      <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-white/80 backdrop-blur-md dark:bg-slate-900/80 dark:border-slate-800 px-4 md:px-6">
-        <div className="flex items-center gap-2 font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">
-          <Calendar className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-          <span className="text-xl">API Dashboard</span>
-        </div>
-        <div className="ml-auto flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-slate-800"
-          >
-            {theme === "dark" ? (
-              <Sun className="h-5 w-5" />
-            ) : (
-              <Moon className="h-5 w-5" />
-            )}
-            <span className="sr-only">Toggle theme</span>
-          </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-slate-800"
-              >
-                <Settings className="h-5 w-5" />
-                <span className="sr-only">Settings</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="bg-white dark:bg-slate-800 border-blue-200 dark:border-slate-700"
-            >
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                Logout
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </header>
+      <Header />
       <main className="flex-1 space-y-6 p-6 md:p-8">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">
-            API Usage Overview
-          </h1>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">
+              API Usage Overview
+            </h1>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+              Welcome, {session?.user?.name || "Brand"}
+            </p>
+          </div>
           <Button
             onClick={() => toast.success("Data exported successfully")}
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-none"
@@ -157,7 +136,6 @@ export default function DashboardPage() {
             Export Data
           </Button>
         </div>
-
         {brandData.errorRate > 10 && (
           <Alert
             variant="destructive"
@@ -269,68 +247,68 @@ export default function DashboardPage() {
 
         <Card className="border-blue-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg">
           <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                Data Visualization
-              </CardTitle>
-              <div className="flex space-x-2">
-                <Button
-                  variant={activeChart === "apiCalls" ? "default" : "outline"}
-                  onClick={() => setActiveChart("apiCalls")}
-                  className={
-                    activeChart === "apiCalls"
-                      ? "bg-blue-600 hover:bg-blue-700 text-white"
-                      : "border-blue-200 dark:border-slate-700 text-blue-600 dark:text-blue-400"
-                  }
-                >
-                  API Calls
-                </Button>
-                <Button
-                  variant={
-                    activeChart === "statusDistribution" ? "default" : "outline"
-                  }
-                  onClick={() => setActiveChart("statusDistribution")}
-                  className={
-                    activeChart === "statusDistribution"
-                      ? "bg-blue-600 hover:bg-blue-700 text-white"
-                      : "border-blue-200 dark:border-slate-700 text-blue-600 dark:text-blue-400"
-                  }
-                >
-                  Status Distribution
-                </Button>
-                <Button
-                  variant={activeChart === "errorRate" ? "default" : "outline"}
-                  onClick={() => setActiveChart("errorRate")}
-                  className={
-                    activeChart === "errorRate"
-                      ? "bg-blue-600 hover:bg-blue-700 text-white"
-                      : "border-blue-200 dark:border-slate-700 text-blue-600 dark:text-blue-400"
-                  }
-                >
-                  Error Rate
-                </Button>
-                <Button
-                  variant={activeChart === "dailyUsage" ? "default" : "outline"}
-                  onClick={() => setActiveChart("dailyUsage")}
-                  className={
-                    activeChart === "dailyUsage"
-                      ? "bg-blue-600 hover:bg-blue-700 text-white"
-                      : "border-blue-200 dark:border-slate-700 text-blue-600 dark:text-blue-400"
-                  }
-                >
-                  Daily Usage
-                </Button>
+            <div className="flex flex-col space-y-4">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                  Data Visualization
+                </CardTitle>
               </div>
+
+              {/* Desktop Buttons - Hidden on mobile */}
+              <div className="hidden md:flex space-x-2">
+                {[
+                  "apiCalls",
+                  "statusDistribution",
+                  "errorRate",
+                  "dailyUsage",
+                ].map((chart) => (
+                  <Button
+                    key={chart}
+                    variant={activeChart === chart ? "default" : "outline"}
+                    onClick={() => setActiveChart(chart)}
+                    className={`${
+                      activeChart === chart
+                        ? "bg-blue-600 hover:bg-blue-700 text-white"
+                        : "border-blue-200 dark:border-slate-700 text-blue-600 dark:text-blue-400"
+                    }`}
+                  >
+                    {chart === "apiCalls"
+                      ? "API Calls"
+                      : chart === "statusDistribution"
+                      ? "Status Distribution"
+                      : chart === "errorRate"
+                      ? "Error Rate"
+                      : "Daily Usage"}
+                  </Button>
+                ))}
+              </div>
+
+              {/* Mobile Dropdown - Visible on mobile */}
+              <div className="md:hidden">
+                <select
+                  value={activeChart}
+                  onChange={(e) => setActiveChart(e.target.value)}
+                  className="w-full p-2 border rounded-md text-blue-600 dark:text-blue-400 bg-white dark:bg-slate-800 border-blue-200 dark:border-slate-700"
+                >
+                  <option value="apiCalls">API Calls</option>
+                  <option value="statusDistribution">
+                    Status Distribution
+                  </option>
+                  <option value="errorRate">Error Rate</option>
+                  <option value="dailyUsage">Daily Usage</option>
+                </select>
+              </div>
+
+              <CardDescription className="text-blue-600/70 dark:text-blue-400/70">
+                {activeChart === "apiCalls" &&
+                  "Daily API usage for the past 7 days"}
+                {activeChart === "statusDistribution" &&
+                  "Breakdown of API call statuses"}
+                {activeChart === "errorRate" && "Daily error rate percentage"}
+                {activeChart === "dailyUsage" &&
+                  "Detailed breakdown of daily API usage"}
+              </CardDescription>
             </div>
-            <CardDescription className="text-blue-600/70 dark:text-blue-400/70">
-              {activeChart === "apiCalls" &&
-                "Daily API usage for the past 7 days"}
-              {activeChart === "statusDistribution" &&
-                "Breakdown of API call statuses"}
-              {activeChart === "errorRate" && "Daily error rate percentage"}
-              {activeChart === "dailyUsage" &&
-                "Detailed breakdown of daily API usage"}
-            </CardDescription>
           </CardHeader>
           <CardContent className="pt-6 h-[400px]">
             {activeChart === "apiCalls" && (
@@ -351,16 +329,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </main>
-      <footer className="border-t border-blue-200 dark:border-slate-800 py-4 px-6 bg-white/80 backdrop-blur-md dark:bg-slate-900/80">
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-xs text-blue-600/70 dark:text-blue-400/70">
-            © 2024 API Dashboard Inc. All rights reserved.
-          </p>
-          <p className="text-xs text-blue-600/70 dark:text-blue-400/70">
-            Version 1.0.0
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
