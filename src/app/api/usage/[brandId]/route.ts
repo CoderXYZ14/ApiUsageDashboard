@@ -3,45 +3,40 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/options";
 import dbConnect from "@/lib/dbConnect";
 import { mockData } from "@/constants/mockData";
+import { BrandData } from "@/types/brand";
 
-// import ApiStat from "@/model/ApiStat";
-
-export async function GET({ params }: { params: { brandId: string } }) {
+export async function GET(
+  request: Request,
+  { params }: { params: { brandId: string } }
+) {
   await dbConnect();
 
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Not authenticated",
-        },
-        { status: 401 }
-      );
-    }
+    // const session = await getServerSession(authOptions);
+    // if (!session?.user?.id) {
+    //   return NextResponse.json(
+    //     {
+    //       success: false,
+    //       message: "Not authenticated",
+    //     },
+    //     { status: 401 }
+    //   );
+    // }
 
-    if (params.brandId !== session.user.id) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Unauthorized access",
-        },
-        { status: 403 }
-      );
-    }
+    // if (params.brandId !== session.user.id) {
+    //   return NextResponse.json(
+    //     {
+    //       success: false,
+    //       message: "Unauthorized access",
+    //     },
+    //     { status: 403 }
+    //   );
+    // }
 
-    // Fetch data from database (using mock data for now)
-    // const brandStats = await ApiStat.find({ brandId: params.brandId }).sort({
-    //   date: -1,
-    // });
+    // Get brand data from mock data
+    const brandData = mockData[params.brandId];
 
-    // If using mock data temporarily:
-    const brandStats = mockData.filter(
-      (item) => item.brandId === params.brandId
-    );
-
-    if (!brandStats || brandStats.length === 0) {
+    if (!brandData) {
       return NextResponse.json(
         {
           success: false,
@@ -55,7 +50,7 @@ export async function GET({ params }: { params: { brandId: string } }) {
       {
         success: true,
         message: "Brand usage data fetched successfully",
-        data: brandStats,
+        data: brandData,
       },
       { status: 200 }
     );

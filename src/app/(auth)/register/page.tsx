@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { signIn } from "next-auth/react";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -40,16 +41,26 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      const { data } = await axios.post('/api/auth/signup', {
+      await axios.post("/api/auth/signup", {
         name,
         email,
         password,
       });
 
-      toast.success(data.message);
-      router.push('/login');
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        toast.error("Invalid email or password");
+      } else {
+        toast.success("Welcome to your API dashboard");
+        router.push("/dashboard");
+      }
     } catch (error) {
-      toast.error('An error occurred during registration');
+      toast.error("An error occurred during registration");
     } finally {
       setIsLoading(false);
     }

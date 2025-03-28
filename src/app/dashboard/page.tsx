@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 import {
   AlertCircle,
   Calendar,
@@ -40,69 +41,59 @@ import ErrorRateChart from "@/components/error-rate-chart";
 import StatusDistributionChart from "@/components/status-distribution-chart";
 import { DailyUsageTable } from "@/components/daily-usage-table";
 import { toast } from "sonner";
-
-// Mock data for Brand 1
-const brand1Data = {
-  totalCalls: 12458,
-  successfulCalls: 11982,
-  failedCalls: 476,
-  errorRate: 3.82,
-  dailyUsage: [
-    { date: "2024-03-21", total: 1245, successful: 1198, failed: 47 },
-    { date: "2024-03-22", total: 1356, successful: 1302, failed: 54 },
-    { date: "2024-03-23", total: 1102, successful: 1067, failed: 35 },
-    { date: "2024-03-24", total: 1432, successful: 1375, failed: 57 },
-    { date: "2024-03-25", total: 1523, successful: 1462, failed: 61 },
-    { date: "2024-03-26", total: 1689, successful: 1621, failed: 68 },
-    { date: "2024-03-27", total: 1578, successful: 1512, failed: 66 },
-    { date: "2024-03-28", total: 1533, successful: 1445, failed: 88 },
-  ],
-};
-
-// Mock data for Brand 2
-const brand2Data = {
-  totalCalls: 8765,
-  successfulCalls: 7889,
-  failedCalls: 876,
-  errorRate: 10.01,
-  dailyUsage: [
-    { date: "2024-03-21", total: 945, successful: 850, failed: 95 },
-    { date: "2024-03-22", total: 1056, successful: 950, failed: 106 },
-    { date: "2024-03-23", total: 902, successful: 812, failed: 90 },
-    { date: "2024-03-24", total: 1132, successful: 1019, failed: 113 },
-    { date: "2024-03-25", total: 1223, successful: 1101, failed: 122 },
-    { date: "2024-03-26", total: 1189, successful: 1070, failed: 119 },
-    { date: "2024-03-27", total: 1178, successful: 1060, failed: 118 },
-    { date: "2024-03-28", total: 1140, successful: 1027, failed: 113 },
-  ],
-};
+import { BrandData } from "@/types/brand";
 
 export default function DashboardPage() {
-  const [brandData, setBrandData] = useState(brand1Data);
-  const [currentBrand, setCurrentBrand] = useState("Brand 1");
+  const [brandData, setBrandData] = useState<BrandData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [activeChart, setActiveChart] = useState("apiCalls");
   const router = useRouter();
 
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
-    // Simulate fetching data based on the current brand
-    if (currentBrand === "Brand 1") {
-      setBrandData(brand1Data);
-    } else {
-      setBrandData(brand2Data);
-    }
-  }, [currentBrand]);
+    const fetchBrandData = async () => {
+      try {
+        // Assuming the brandId is the same as the user's id
+        const brandId = "brand1"; // This could come from props, context, or router
+        const response = await axios.get(`/api/usage/${brandId}`);
+        if (response.data.success) {
+          setBrandData(response.data.data);
+          setIsLoading(false);
+        } else {
+          toast.error(response.data.message);
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error("Error fetching brand data:", error);
+        toast.error("Failed to fetch brand data");
+        setIsLoading(false);
+      }
+    };
+
+    fetchBrandData();
+  }, []);
 
   const handleLogout = () => {
     toast.success("You have been logged out successfully");
     router.push("/");
   };
 
-  const handleBrandChange = (brand: string) => {
-    setCurrentBrand(brand);
-    toast.info(`Now viewing data for ${brand}`);
-  };
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  if (!brandData) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p>No brand data available</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-blue-50 to-purple-50 dark:from-slate-900 dark:to-blue-950">
@@ -112,32 +103,6 @@ export default function DashboardPage() {
           <span className="text-xl">API Dashboard</span>
         </div>
         <div className="ml-auto flex items-center gap-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-white dark:bg-slate-800 border-blue-200 dark:border-slate-700"
-              >
-                <User className="mr-2 h-4 w-4 text-blue-600 dark:text-blue-400" />
-                {currentBrand}
-                <ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="bg-white dark:bg-slate-800 border-blue-200 dark:border-slate-700"
-            >
-              <DropdownMenuLabel>Switch Brand</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => handleBrandChange("Brand 1")}>
-                Brand 1
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleBrandChange("Brand 2")}>
-                Brand 2
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
           <Button
             variant="ghost"
             size="icon"
